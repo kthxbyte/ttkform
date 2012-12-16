@@ -320,8 +320,39 @@ namespace eval tf {
 				debugmsg "verify: no fields to verify."
 				return
 			}
-			# TODO: Implement this NOW. In the same fashion, all tf::* objects
-			#		should implement a verify method as well.
+			set bad_fields {}
+			if {$submit_button ne {}} {
+				if {[winfo exists $submit_button]} {
+					$submit_button configure -state enabled -style Normal.TButton -text $submit_message
+				}
+			}
+			foreach field_list $field_containers {
+				foreach field $field_list {
+					set error_message [$field verify]
+					if {$error_message ne {}} {
+						$field configure -style ERROR
+						# First error found? disable button and print the error message
+						if {$bad_fields eq {}} {
+							if {$submit_button ne {}} {
+								if {[winfo exists $submit_button]} {
+									$submit_button configure -state disabled -style Bold.TButton -text $error_message
+								}
+							}
+							$field configure -style ERROR_BOLD
+						}
+						lappend bad_fields [list $field $error_message]
+					} 
+				}
+			}
+			if {$bad_fields ne {}} {
+				debugmsg "verify: Form disabled, bad fields found:"
+				foreach error_block $bad_fields {
+					foreach {field_name error_message} $error_block {}
+					debugmsg "verify: - \[$field_name\] $error_message"
+				}
+			} else {
+				debugmsg "verify: all fields ok"			
+			}
 		}
 		
 		## Iterate over all fields, capturing their contents and producing a 
@@ -373,5 +404,3 @@ namespace eval tf {
 		}
 	}
 }
-
-
