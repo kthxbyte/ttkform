@@ -17,6 +17,7 @@ namespace eval tf {
 		protected variable box {}
 		protected variable parent_form {}
 		protected variable debug_mode "off"
+		protected variable style "NORMAL"
 		
 		## All objects derived from tf::Widget implement this method. This way,
 		# you can turn on debugging for the individual object you're trying to
@@ -63,6 +64,9 @@ namespace eval tf {
 		#- \b -debug
 		#	Set to "on" turns on debug messages for this object. To disable,
 		#	set this option to "off". All objects are set to "off" by default.
+		#- \b -style 
+		#	Defines the look of the label on screen. Supported styles are 
+		#	\b NORMAL, \b BOLD, \b ERROR and \b ERROR_BOLD.
 		#.
 		# If no arguments are provided, the object will return a list with 
 		# its current settings. It is not currently possible to query a given
@@ -103,6 +107,34 @@ namespace eval tf {
 							debugmsg "configure: This field already contains the value '$stored_value'. Overwriting with '$options($option)'."
 						}
 						set stored_value $options($option)
+					}
+					"-style" {
+						if {[winfo exists $title_label]} {
+							switch $options($option) {
+								"ERROR_BOLD" {
+									$title_label configure \
+										-style Bold.TLabel \
+										-foreground red
+								}
+								"ERROR" {
+									$title_label configure \
+										-style Normal.TLabel \
+										-foreground red
+								}
+								"BOLD" {
+									$title_label configure \
+										-style Bold.TLabel \
+										-foreground black
+								}
+								"NORMAL" {
+									$title_label configure \
+										-style Normal.TLabel \
+										-foreground black
+								}
+								default {
+								}
+							}
+						}
 					}
 					default {
 						debugmsg "configure: Ignoring unknown option '$option'"
