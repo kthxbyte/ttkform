@@ -21,5 +21,6 @@ namespace eval tf {
 source [file join $dir widget.tcl]
 source [file join $dir entry.tcl]
 source [file join $dir form.tcl]
+source [file join $dir validation.tcl]
 
-package provide ttkform 2012.12.16
+package provide ttkform 2012.12.17
