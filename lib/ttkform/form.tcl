@@ -304,12 +304,12 @@ namespace eval tf {
 			}
 		}
 		
-		## Iterate over all fields, calling their own verifier methods, 
+		## Iterate over all fields, calling their own validation methods, 
 		# catching errors and marking the fields that failed the test.
 		# The error message produced by the first field that fails is displayed
 		# in the "submit" button, which automatically gets disabled.
 		#
-		public method verify {} {
+		public method validate {} {
 			if {$rows ne {}} {
 				set field_containers $rows
 			}
@@ -317,7 +317,7 @@ namespace eval tf {
 				set field_containers $columns
 			}
 			if {![info exists field_containers]} {
-				debugmsg "verify: no fields to verify."
+				debugmsg "validate: no fields to validate."
 				return
 			}
 			set bad_fields {}
@@ -328,7 +328,7 @@ namespace eval tf {
 			}
 			foreach field_list $field_containers {
 				foreach field $field_list {
-					set error_message [$field verify]
+					set error_message [$field validate]
 					if {$error_message ne {}} {
 						$field configure -style ERROR
 						# First error found? disable button and print the error message
@@ -345,13 +345,13 @@ namespace eval tf {
 				}
 			}
 			if {$bad_fields ne {}} {
-				debugmsg "verify: Form disabled, bad fields found:"
+				debugmsg "validate: Form disabled, bad fields found:"
 				foreach error_block $bad_fields {
 					foreach {field_name error_message} $error_block {}
-					debugmsg "verify: - \[$field_name\] $error_message"
+					debugmsg "validate: - \[$field_name\] $error_message"
 				}
 			} else {
-				debugmsg "verify: all fields ok"			
+				debugmsg "validate: all fields ok"			
 			}
 		}
 		
