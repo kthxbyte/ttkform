@@ -54,7 +54,7 @@ namespace eval tf {
 		#	Sets a title for this object.
 		#- \b -form 
 		#	Links this entry to a tf::Form object. Changes in user input
-		#	will force a re-verification of the linked tf::Form object.
+		#	will force a validation of the linked tf::Form object.
 		#- \b -value 
 		#	Sets a new value for this object. Implemented for convenience, it 
 		#	does pretty much the same as calling \ref setValue.
@@ -97,10 +97,12 @@ namespace eval tf {
 					"-form" {
 						if {$parent_form ne {}} {
 							debugmsg "configure: This field is already attached to form $parent_form. Will detach and reattach to $options($option)."
+							catch {trace remove variable stored_value write [list $parent_form validate]}
 						} else {
 							debugmsg "configure: attached to form $options($option)"
 						}
 						set parent_form $options($option)
+						trace variable stored_value w [list $parent_form validate]
 					}
 					"-value" {
 						if {$stored_value ne {}} {
