@@ -95,7 +95,9 @@ namespace eval tf {
 			pack $submit_button -side bottom -padx 6 -pady 4
 			pack $button_frame -side bottom
 			
+			# Display all fields, then perform a first validation on actual content
 			displayFields
+			validate
 			return $title_frame
 		}
 		
@@ -308,8 +310,10 @@ namespace eval tf {
 		# catching errors and marking the fields that failed the test.
 		# The error message produced by the first field that fails is displayed
 		# in the "submit" button, which automatically gets disabled.
+		# \param args Optional argument, used internally to allow this 
+		# method to be executed as a callback from \c trace variable commands.
 		#
-		public method validate {} {
+		public method validate {{args {}}} {
 			if {$rows ne {}} {
 				set field_containers $rows
 			}
@@ -320,6 +324,7 @@ namespace eval tf {
 				debugmsg "validate: no fields to validate."
 				return
 			}
+			# Enable the submit button, print the 'normal' submit message.
 			set bad_fields {}
 			if {$submit_button ne {}} {
 				if {[winfo exists $submit_button]} {
@@ -328,10 +333,15 @@ namespace eval tf {
 			}
 			foreach field_list $field_containers {
 				foreach field $field_list {
+					# Begin assuming everything's ok with this field.
+					$field configure -style NORMAL					
 					set error_message [$field validate]
+
+					# Or not.
 					if {$error_message ne {}} {
 						$field configure -style ERROR
-						# First error found? disable button and print the error message
+						
+						# First error found? disable submit button and print the error message
 						if {$bad_fields eq {}} {
 							if {$submit_button ne {}} {
 								if {[winfo exists $submit_button]} {
