@@ -13,6 +13,7 @@ namespace eval tf {
 		inherit Widget
 		protected variable valid_characters {}
 		protected variable show_character {}
+		protected variable validation_rules {}
 
 		## All objects derived from tf::Widget implement this method. This way,
 		# you can turn on debugging for the individual object you're trying to
@@ -68,6 +69,10 @@ namespace eval tf {
 		#- \b -debug
 		#	Set to "on" turns on debug messages for this object. To disable,
 		#	set this option to "off". All objects are set to "off" by default.
+		#- \b -rules
+		#	List of validation rules. Example:\code
+		#	myAge configure -rules [list {greater_than 18} {required}]
+		#	\endcode
 		#.
 		# If no arguments are provided, the object will return a list with 
 		# its current settings. It is not currently possible to query a given
@@ -86,6 +91,7 @@ namespace eval tf {
 				puts "-form \{$parent_form\}"
 				puts "-show \{$show_character\}"
 				puts "-validcharacters \{$valid_characters\}"
+				puts "-rules \{$validation_rules\}"
 			}
 			array set options $args
 			set unknown_options {}
@@ -101,6 +107,9 @@ namespace eval tf {
 								$widget configure -show $show_character
 							}
 						}
+					}
+					"-rules" {
+						set validation_rules $options($option)
 					}
 					default {
 						#puts "$this (tf::Entry): Ignoring unknown option '$option'"
@@ -168,6 +177,32 @@ namespace eval tf {
 			}
 			# So, it was valid input after all.
 			return 1
-		}		
+		}
+		
+		## Iterate over the internal rule list, checking no rules have been 
+		# broken by current user input.
+		#\returns 
+		#	-\c {} if no rules were broken
+		#	- Error message corresponding to the first rule broken, if any. 
+		#
+		public method validate {} {
+			foreach rule $validation_rules {
+				set function [lindex $rule 0]
+				set parameters [lrange $rule 1 end-1]
+				set error_message [lindex $rule end]
+
+				if {$parameters eq {}} {
+					set result [tf::$function $this]
+				} else {
+					set result [tf::$function $this [concat $parameters]]
+				}
+				if {$result eq $tf::FALSE} {
+					debugmsg "validate: broken rule '[lindex $rule 0]'"
+					return $error_message
+				}
+				debugmsg "validate: rule '[lindex $rule 0]' OK"
+			}
+			return {}
+		}
 	}
 }
